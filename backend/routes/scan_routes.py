@@ -6,7 +6,7 @@ from flask import Blueprint, current_app, jsonify, request
 from backend.engine.correlation_engine import correlate_dns_to_aws
 from backend.engine.finding_engine import analyze_aws_inventory, analyze_dns_results
 from backend.database.history import list_scans, save_scan
-from backend.demo.sample_data import get_demo_data
+from backend.demo.sample_data import get_cloud_decommissioning_demo, get_demo_data
 from backend.scanners.aws_scanner import collect_aws_inventory
 from backend.scanners.cname_scanner import assess_cname_targets
 from backend.scanners.dns_scanner import scan_dns_records
@@ -258,4 +258,61 @@ def run_aws_demo():
             "findings": findings,
             "correlations": correlations,
         },
+    }), 200
+
+
+@scan_bp.route("/scans/demo", methods=["POST"])
+def run_cloud_decommissioning_demo():
+    """Return one coherent fictional cloud-decommissioning assessment."""
+    scenario = get_cloud_decommissioning_demo()
+    domain = scenario["domain"]
+    dns_results = scenario["dns"]["results"]
+
+    findings = analyze_dns_results(domain, dns_results)
+
+    for assessment in scenario["cname_assessments"]:
+        if assessment.get("status") != "nxdomain":
+            continue
+        hostname = assessment["hostname"]
+        target = assessment["target"]
+        findings.append({
+            "id": f"demo-dangling-cname-{hostname}",
+            "type": "potential_dangling_cname",
+            "title": "Potential dangling CNAME reference",
+            "severity": "medium",
+            "confidence": "medium",
+            "hostname": hostname,
+            "target": target,
+            "description": (
+                f"{hostname} points to {target}, which is marked NXDOMAIN "
+                "in this synthetic scenario. Provider-side claimability is "
+                "not tested or implied."
+            ),
+            "evidence": [
+                f"Synthetic CNAME target: {target}.",
+                "Synthetic fixture marks target as NXDOMAIN.",
+            ],
+            "recommendation": (
+                "In a real environment, verify provider-side allocation, "
+                "resource ownership and change/decommission records."
+            ),
+        })
+
+    inventory = scenario.pop("inventory")
+    aws_findings = analyze_aws_inventory(inventory)
+    correlations = correlate_dns_to_aws(dns_results, inventory.get("resources", []))
+
+    scenario["findings"] = findings
+    scenario["aws"] = {
+        "source": "synthetic_demo_data",
+        "notice": scenario["scenario"]["notice"],
+        "inventory": inventory,
+        "findings": aws_findings,
+        "correlations": correlations,
+    }
+
+    return jsonify({
+        "status": "demo",
+        "message": "Synthetic cloud decommissioning scenario loaded. No live domain or AWS account was scanned.",
+        "data": scenario,
     }), 200
