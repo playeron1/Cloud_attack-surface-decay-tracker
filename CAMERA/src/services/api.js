@@ -1,32 +1,39 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://127.0.0.1:5000",
-    timeout: 15000,
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5000",
+  timeout: 15000,
 });
 
-// Check backend connection
-export const getHealth = async () => {
-    const response = await api.get("/api/health");
-    return response.data;
-};
+export async function getHealth() {
+  const response = await api.get("/api/health");
+  return response.data;
+}
 
-// Scan manually entered hostnames
-export const scanDns = async (hostnames) => {
-    const response = await api.post("/api/scans/dns", {
-        hostnames,
-    });
+export async function scanDns(hostnames) {
+  const response = await api.post("/api/scans/dns", { hostnames });
+  return response.data;
+}
 
-    return response.data;
-};
+export async function scanDomain(domain) {
+  const response = await api.post(
+    "/api/scans/domain",
+    { domain },
+    { timeout: 180000 }
+  );
+  return response.data;
+}
 
-// Discover subdomains and assess their DNS records
-export const scanDomain = async (domain) => {
-    const response = await api.post(
-        "/api/scans/domain",
-        { domain },
-        { timeout: 120000 }
-    );
+export async function scanAwsInventory({ region, dnsResults = [] } = {}) {
+  const response = await api.post(
+    "/api/scans/aws",
+    { region, dns_results: dnsResults },
+    { timeout: 120000 }
+  );
+  return response.data;
+}
 
-    return response.data;
-};
+export async function getScanHistory(limit = 10) {
+  const response = await api.get("/api/scans/history", { params: { limit } });
+  return response.data;
+}
