@@ -7,6 +7,8 @@ import {
 } from "./services/api";
 import "./App.css";
 
+const EMPTY_LIST = [];
+
 function getRecordCount(host) {
   const records = host?.records || {};
   return Object.values(records).reduce(
@@ -44,19 +46,36 @@ function App() {
   }, []);
 
   useEffect(() => {
-    getHealth()
-      .then(() => setBackendStatus("Connected"))
-      .catch(() => setBackendStatus("Disconnected"));
-    refreshHistory();
-  }, [refreshHistory]);
+    let active = true;
 
-  const hosts = scanData?.data?.dns?.results || [];
-  const findings = scanData?.data?.findings || [];
+    getHealth()
+      .then(() => {
+        if (active) setBackendStatus("Connected");
+      })
+      .catch(() => {
+        if (active) setBackendStatus("Disconnected");
+      });
+
+    getScanHistory(8)
+      .then((response) => {
+        if (active) setHistory(response.data || EMPTY_LIST);
+      })
+      .catch(() => {
+        if (active) setHistory(EMPTY_LIST);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const hosts = scanData?.data?.dns?.results || EMPTY_LIST;
+  const findings = scanData?.data?.findings || EMPTY_LIST;
   const discovery = scanData?.data?.discovery;
-  const cnameAssessments = scanData?.data?.cname_assessments || [];
+  const cnameAssessments = scanData?.data?.cname_assessments || EMPTY_LIST;
   const awsInventory = awsData?.data?.inventory;
-  const awsFindings = awsData?.data?.findings || [];
-  const correlations = awsData?.data?.correlations || [];
+  const awsFindings = awsData?.data?.findings || EMPTY_LIST;
+  const correlations = awsData?.data?.correlations || EMPTY_LIST;
 
   const resolvedCount = hosts.filter((host) => host.status === "resolved").length;
   const partialCount = hosts.filter((host) => host.status === "partial").length;
