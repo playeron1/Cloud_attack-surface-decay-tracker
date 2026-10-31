@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   getHealth,
   getScanHistory,
+  loadAwsDemo,
   scanAwsInventory,
   scanDomain,
 } from "./services/api";
@@ -136,6 +137,26 @@ function App() {
         err.response?.data?.message ||
         err.message ||
         "AWS inventory scan failed."
+      );
+    } finally {
+      setAwsLoading(false);
+    }
+  };
+
+
+  const handleAwsDemo = async () => {
+    setAwsLoading(true);
+    setAwsError("");
+    setAwsData(null);
+
+    try {
+      const response = await loadAwsDemo();
+      setAwsData(response);
+    } catch (err) {
+      setAwsError(
+        err.response?.data?.message ||
+        err.message ||
+        "Could not load the synthetic AWS demo dataset."
       );
     } finally {
       setAwsLoading(false);
@@ -405,22 +426,34 @@ function App() {
           <span className="step-number">AWS</span>
         </div>
         <div className="aws-controls">
-          <label htmlFor="region">AWS region</label>
-          <select id="region" value={region} onChange={(event) => setRegion(event.target.value)}>
-            <option value="ap-south-1">Asia Pacific (Mumbai) · ap-south-1</option>
-            <option value="us-east-1">US East (N. Virginia) · us-east-1</option>
-            <option value="us-east-2">US East (Ohio) · us-east-2</option>
-            <option value="us-west-2">US West (Oregon) · us-west-2</option>
-            <option value="eu-west-1">Europe (Ireland) · eu-west-1</option>
-          </select>
-          <button className="secondary-button" type="button" onClick={handleAwsScan} disabled={awsLoading}>
-            {awsLoading ? "Collecting inventory…" : "Scan connected AWS account"}
-          </button>
+          <div className="region-field">
+            <label htmlFor="region">AWS region</label>
+            <select id="region" value={region} onChange={(event) => setRegion(event.target.value)}>
+              <option value="ap-south-1">Asia Pacific (Mumbai) · ap-south-1</option>
+              <option value="us-east-1">US East (N. Virginia) · us-east-1</option>
+              <option value="us-east-2">US East (Ohio) · us-east-2</option>
+              <option value="us-west-2">US West (Oregon) · us-west-2</option>
+              <option value="eu-west-1">Europe (Ireland) · eu-west-1</option>
+            </select>
+          </div>
+          <div className="aws-actions">
+            <button className="secondary-button" type="button" onClick={handleAwsScan} disabled={awsLoading}>
+              {awsLoading ? "Collecting inventory…" : "Scan connected AWS account"}
+            </button>
+            <button className="secondary-button demo-button" type="button" onClick={handleAwsDemo} disabled={awsLoading}>
+              Load synthetic demo data
+            </button>
+          </div>
         </div>
         <p className="subtle-note">
           Requires a configured read-only AWS identity on the backend machine. No AWS credentials are sent to the browser.
         </p>
         {awsError && <div className="alert warning-alert">{awsError}</div>}
+        {awsData?.data?.source === "synthetic_demo_data" && (
+          <div className="alert demo-alert">
+            SAMPLE DATA ONLY — {awsData.data.notice}
+          </div>
+        )}
         {awsData && awsInventory && (
           <>
             <div className="metric-grid aws-metrics">
@@ -428,6 +461,11 @@ function App() {
               <Metric label="AWS findings" value={awsFindings.length} detail="Ownership and configuration indicators" />
               <Metric label="IP correlations" value={correlations.filter((item) => item.status === "matched").length} detail={`${correlations.length} DNS IPs checked`} />
             </div>
+            {awsInventory.errors?.length > 0 && (
+              <div className="alert warning-alert">
+                AWS returned {awsInventory.errors.length} resource-level permission or metadata warning(s). Review the error list in the exported report.
+              </div>
+            )}
             <div className="table-wrap">
               <table>
                 <thead><tr><th>Resource type</th><th>Resource ID</th><th>State</th><th>Ownership tags</th></tr></thead>
