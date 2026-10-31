@@ -15,6 +15,7 @@ CAST investigates residual infrastructure after application decommissioning by c
 - Optional read-only AWS inventory for EC2 instances, EBS volumes and S3 bucket configuration.
 - Exact DNS A/AAAA to EC2 public/private IP correlation.
 - JSON report export from the React dashboard.
+- Clearly labelled synthetic AWS sample mode for demonstrations without cloud credentials.
 
 ## Architecture
 
@@ -73,7 +74,7 @@ The backend reads these optional environment variables:
 | CAST_DEBUG | false | Flask development debug mode |
 | CAST_CORS_ORIGINS | localhost:5173 and 127.0.0.1:5173 | Comma-separated allowed frontend origins |
 | CAST_MAX_SCAN_HOSTS | 10 | Maximum hosts assessed per domain scan |
-| CAST_MAX_HISTORY_ITEMS | 20 | Reserved history display setting |
+| CAST_MAX_HISTORY_ITEMS | 20 | Maximum number of history entries returned |
 | CAST_HISTORY_DB | backend/reports/cast_history.sqlite3 | SQLite history database path |
 | AWS_DEFAULT_REGION | ap-south-1 | Default AWS inventory region |
 | AWS_PROFILE | default credential chain | Optional local AWS profile name |
@@ -92,7 +93,7 @@ The AWS feature is optional. The core domain scan works without AWS credentials.
 
 Configure a dedicated read-only AWS identity on the backend host using the AWS SDK default credential chain or a local profile. Grant only the read/list/describe permissions required for STS identity, EC2 instance and volume descriptions, S3 bucket listing, bucket location, public access block and bucket policy status.
 
-Then use **Scan connected AWS account** in the dashboard. The endpoint never accepts access keys or secret keys from the browser. Without valid credentials or permissions, CAST returns an explicit unavailable response and the domain scanner remains usable.
+Then use **Scan connected AWS account** in the dashboard. The endpoint never accepts access keys or secret keys from the browser. Without valid credentials or permissions, CAST returns an explicit unavailable response and the domain scanner remains usable. The **Load synthetic demo data** control provides fictional resources and reserved documentation IP ranges for a transparent offline walkthrough; it is never presented as live AWS data.
 
 The current correlation is an exact IP match between DNS A/AAAA observations and EC2 public/private addresses in the selected region/account inventory. A non-match does not prove the resource is abandoned; resources in other accounts, regions, CDNs, load balancers or external providers will not appear in that match set.
 
@@ -105,6 +106,7 @@ The current correlation is an exact IP match between DNS A/AAAA observations and
 | POST | /api/scans/domain | Discover and assess a root domain |
 | GET | /api/scans/history | Retrieve recent saved domain scans |
 | POST | /api/scans/aws | Collect read-only AWS inventory and correlate supplied DNS observations |
+| POST | /api/scans/aws/demo | Load explicitly synthetic demo inventory and correlation fixtures |
 
 ## Tests and build
 
