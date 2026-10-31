@@ -18,7 +18,7 @@ CAST investigates residual infrastructure after application decommissioning by c
 
 ## Architecture
 
-\`\`\`text
+```text
 React + Vite (CAMERA)
         |
         | HTTP / JSON
@@ -32,7 +32,7 @@ Flask API (backend/app.py)
         +-- AWS read-only inventory adapter
         +-- DNS / AWS IP correlation
         +-- SQLite scan history
-\`\`\`
+```
 
 ## Requirements
 
@@ -46,21 +46,21 @@ Flask API (backend/app.py)
 
 From the repository root:
 
-\`\`\`powershell
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r backend/requirements.txt
 python -m backend.app
-\`\`\`
+```
 
 Open a second PowerShell terminal:
 
-\`\`\`powershell
+```powershell
 cd CAMERA
 npm install
 npm run dev
-\`\`\`
+```
 
 Open the Vite URL printed in the terminal (normally http://localhost:5173).
 
@@ -78,11 +78,11 @@ The backend reads these optional environment variables:
 | AWS_DEFAULT_REGION | ap-south-1 | Default AWS inventory region |
 | AWS_PROFILE | default credential chain | Optional local AWS profile name |
 
-The frontend can set \`VITE_API_BASE_URL\` in \`CAMERA/.env.local\`, for example:
+The frontend can set `VITE_API_BASE_URL` in `CAMERA/.env.local`, for example:
 
-\`\`\`env
+```env
 VITE_API_BASE_URL=http://127.0.0.1:5000
-\`\`\`
+```
 
 Do not put AWS keys or other secrets in any Vite environment variable. Vite variables are exposed to the browser.
 
@@ -110,19 +110,19 @@ The current correlation is an exact IP match between DNS A/AAAA observations and
 
 From the repository root:
 
-\`\`\`powershell
+```powershell
 python -m pytest -q
 python -m compileall -q backend
-\`\`\`
+```
 
 Frontend:
 
-\`\`\`powershell
+```powershell
 cd CAMERA
 npm ci
 npm run lint
 npm run build
-\`\`\`
+```
 
 ## Detection interpretation
 
@@ -136,7 +136,7 @@ npm run build
 
 ## Limitations
 
-- The domain scanner assesses up to 10 hosts by default for a fast demo. Increase \`CAST_MAX_SCAN_HOSTS\` thoughtfully.
+- The domain scanner assesses up to 10 hosts by default for a fast demo. Increase `CAST_MAX_SCAN_HOSTS` thoughtfully.
 - Certificate Transparency is not a complete inventory of all DNS hostnames.
 - DNS observations are point-in-time and can vary with resolver, TTL and network conditions.
 - CNAME verification only checks whether A/AAAA lookup succeeds or returns NXDOMAIN; it does not claim resources or prove takeover.
