@@ -174,6 +174,28 @@ def analyze_aws_inventory(inventory: dict[str, Any]) -> list[dict[str, Any]]:
 
         if (
             resource_type == "s3_bucket"
+            and resource.get("public_access_block_status") == "not_configured"
+        ):
+            findings.append({
+                "id": f"s3-public-access-block-{resource_id}",
+                "type": "s3_public_access_block_not_configured",
+                "title": "S3 bucket-level public access block not configured",
+                "severity": "info",
+                "confidence": "high",
+                "hostname": resource_id,
+                "description": (
+                    f"S3 bucket {resource_id} has no bucket-level public access block. "
+                    "An account-level block may still apply."
+                ),
+                "evidence": ["GetPublicAccessBlock returned NoSuchPublicAccessBlockConfiguration."],
+                "recommendation": (
+                    "Review account-level and bucket-level public access controls, "
+                    "then apply the organization's intended baseline."
+                ),
+            })
+
+        if (
+            resource_type == "s3_bucket"
             and resource.get("bucket_policy_public") is True
         ):
             findings.append({
