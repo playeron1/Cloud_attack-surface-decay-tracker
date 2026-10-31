@@ -1,11 +1,13 @@
+
 from flask import Flask, jsonify
 from flask_cors import CORS
+
+from backend.routes.scan_routes import scan_bp
 
 
 def create_app():
     app = Flask(__name__)
 
-    # Allow requests from our React development server.
     CORS(
         app,
         resources={
@@ -22,6 +24,8 @@ def create_app():
             "message": "Cloud Attack-Surface Decay Tracker API is running",
             "service": "CAST Backend"
         }), 200
+
+    app.register_blueprint(scan_bp, url_prefix="/api")
 
     return app
 
