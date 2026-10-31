@@ -19,7 +19,7 @@ function SeverityPill({ severity = "info" }) {
   const allowed = ["critical", "high", "medium", "low", "info"];
   const normalized = String(severity).toLowerCase();
   const value = allowed.includes(normalized) ? normalized : "info";
-  return <span className={\`severity-pill \${value}\`}>{value}</span>;
+  return <span className={`severity-pill ${value}`}>{value}</span>;
 }
 
 function App() {
@@ -136,7 +136,7 @@ function App() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = \`cast-report-\${scanData.data?.domain || "scan"}.json\`;
+    link.download = `cast-report-${scanData.data?.domain || "scan"}.json`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -155,7 +155,7 @@ function App() {
         </a>
         <div className="topbar-right">
           <span className="eyebrow">CLOUD SECURITY INTELLIGENCE</span>
-          <span className={\`connection-chip \${backendStatus === "Connected" ? "online" : "offline"}\`}>
+          <span className={`connection-chip ${backendStatus === "Connected" ? "online" : "offline"}`}>
             <i />
             API {backendStatus}
           </span>
@@ -222,7 +222,7 @@ function App() {
           <section className="metric-grid">
             <Metric label="CT hostnames" value={discovery?.total_discovered ?? 0} detail="Discovered candidates" />
             <Metric label="Hosts assessed" value={hosts.length} detail="Root + selected hosts" />
-            <Metric label="Resolved" value={resolvedCount} detail={\`\${partialCount} partial · \${nxdomainCount} NXDOMAIN\`} />
+            <Metric label="Resolved" value={resolvedCount} detail={`${partialCount} partial · ${nxdomainCount} NXDOMAIN`} />
             <Metric label="DNS records" value={recordCount} detail="A · AAAA · CNAME · NS · MX" />
             <Metric label="Findings" value={findings.length} detail="Evidence-based observations" />
           </section>
@@ -303,7 +303,7 @@ function App() {
                   <thead><tr><th>Source hostname</th><th>CNAME target</th><th>Verification</th><th>Evidence</th></tr></thead>
                   <tbody>
                     {cnameAssessments.map((item, index) => (
-                      <tr key={\`\${item.hostname}-\${item.target}-\${index}\`}>
+                      <tr key={`${item.hostname}-${item.target}-${index}`}>
                         <td>{item.hostname}</td>
                         <td className="mono">{item.target}</td>
                         <td><StatusPill status={item.status} /></td>
@@ -360,11 +360,11 @@ function App() {
                     Object.entries(host.records || {}).flatMap(([type, values]) => {
                       const list = Array.isArray(values) ? values : values == null ? [] : [values];
                       return (list.length ? list : ["No record"]).map((value, index) => (
-                        <tr key={\`\${host.hostname}-\${type}-\${index}\`}>
+                        <tr key={`${host.hostname}-${type}-${index}`}>
                           <td className="mono">{host.hostname}</td>
                           <td><span className="record-type">{type}</span></td>
                           <td className="mono">{String(value)}</td>
-                          <td>{host.ttl_seconds?.[type] != null ? \`\${host.ttl_seconds[type]}s\` : "—"}</td>
+                          <td>{host.ttl_seconds?.[type] != null ? `${host.ttl_seconds[type]}s` : "—"}</td>
                         </tr>
                       ));
                     })
@@ -405,16 +405,16 @@ function App() {
         {awsData && awsInventory && (
           <>
             <div className="metric-grid aws-metrics">
-              <Metric label="AWS resources" value={awsInventory.total_resources} detail={\`Account \${awsInventory.account_id}\`} />
+              <Metric label="AWS resources" value={awsInventory.total_resources} detail={`Account ${awsInventory.account_id}`} />
               <Metric label="AWS findings" value={awsFindings.length} detail="Ownership and configuration indicators" />
-              <Metric label="IP correlations" value={correlations.filter((item) => item.status === "matched").length} detail={\`\${correlations.length} DNS IPs checked\`} />
+              <Metric label="IP correlations" value={correlations.filter((item) => item.status === "matched").length} detail={`${correlations.length} DNS IPs checked`} />
             </div>
             <div className="table-wrap">
               <table>
                 <thead><tr><th>Resource type</th><th>Resource ID</th><th>State</th><th>Ownership tags</th></tr></thead>
                 <tbody>
                   {awsInventory.resources.map((resource) => (
-                    <tr key={\`\${resource.resource_type}-\${resource.resource_id}\`}>
+                    <tr key={`${resource.resource_type}-${resource.resource_id}`}>
                       <td>{resource.resource_type}</td>
                       <td className="mono">{resource.resource_id}</td>
                       <td>{resource.state || "—"}</td>
@@ -441,7 +441,7 @@ function App() {
               {correlations.length === 0 ? (
                 <p className="subtle-note">No DNS A/AAAA addresses were supplied for correlation.</p>
               ) : correlations.map((item, index) => (
-                <div className="compact-finding" key={\`\${item.hostname}-\${item.ip_address}-\${index}\`}>
+                <div className="compact-finding" key={`${item.hostname}-${item.ip_address}-${index}`}>
                   <StatusPill status={item.status} />
                   <strong>{item.hostname}</strong>
                   <span className="mono">{item.ip_address}</span>
@@ -503,7 +503,7 @@ function Metric({ label, value, detail }) {
 
 function StatusPill({ status = "unknown" }) {
   const safe = String(status).toLowerCase().replace(/[^a-z0-9_-]/g, "");
-  return <span className={\`status-pill \${safe}\`}>{String(status).replaceAll("_", " ")}</span>;
+  return <span className={`status-pill ${safe}`}>{String(status).replaceAll("_", " ")}</span>;
 }
 
 export default App;
