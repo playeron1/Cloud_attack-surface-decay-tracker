@@ -37,3 +37,9 @@ export async function getScanHistory(limit = 10) {
   const response = await api.get("/api/scans/history", { params: { limit } });
   return response.data;
 }
+
+
+export async function loadAwsDemo() {
+  const response = await api.post("/api/scans/aws/demo", {});
+  return response.data;
+}
