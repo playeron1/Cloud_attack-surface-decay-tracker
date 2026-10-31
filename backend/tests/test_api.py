@@ -82,3 +82,19 @@ def test_aws_route_returns_service_unavailable_without_identity(monkeypatch):
     response = app.test_client().post("/api/scans/aws", json={"region": "ap-south-1"})
     assert response.status_code == 503
     assert response.get_json()["status"] == "unavailable"
+
+
+def test_aws_demo_endpoint_is_labelled_synthetic():
+    app = create_app()
+    app.config.update(TESTING=True)
+    response = app.test_client().post("/api/scans/aws/demo", json={})
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["status"] == "demo"
+    assert payload["data"]["source"] == "synthetic_demo_data"
+    assert "fictional demo fixtures" in payload["data"]["notice"]
+    assert any(
+        item["status"] == "matched"
+        for item in payload["data"]["correlations"]
+    )
