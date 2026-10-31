@@ -147,7 +147,11 @@ def run_domain_scan():
 
     history_saved = True
     try:
-        save_scan(domain, {"status": final_status, "data": response_data})
+        save_scan(
+            domain,
+            {"status": final_status, "data": response_data},
+            db_path=current_app.config["HISTORY_DB_PATH"],
+        )
     except Exception:
         logger.exception("Could not save scan history")
         history_saved = False
@@ -166,7 +170,10 @@ def get_scan_history():
         limit = int(request.args.get("limit", 10))
         return jsonify({
             "status": "success",
-            "data": list_scans(limit=limit),
+            "data": list_scans(
+                limit=min(limit, current_app.config["MAX_HISTORY_ITEMS"]),
+                db_path=current_app.config["HISTORY_DB_PATH"],
+            ),
         }), 200
     except (TypeError, ValueError):
         return jsonify({"status": "error", "message": "Limit must be an integer."}), 400
@@ -182,7 +189,7 @@ def run_aws_scan():
         return jsonify({"status": "error", "message": "Request must contain JSON."}), 400
 
     region = payload.get("region") or current_app.config["AWS_DEFAULT_REGION"]
-    if not isinstance(region, str) or not re.fullmatch(r"[a-z]{2}(?:-gov)?-[a-z]+-\\d", region):
+    if not isinstance(region, str) or not re.fullmatch(r"[a-z]{2}(?:-gov)?-[a-z]+-\d", region):
         return jsonify({"status": "error", "message": "Provide a valid AWS region."}), 400
 
     dns_results = payload.get("dns_results", [])
