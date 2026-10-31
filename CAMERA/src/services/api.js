@@ -40,6 +40,6 @@ export async function getScanHistory(limit = 10) {
 
 
 export async function loadAwsDemo() {
-  const response = await api.post("/api/scans/aws/demo", {});
+  const response = await api.post("/api/scans/demo", {});
   return response.data;
 }
