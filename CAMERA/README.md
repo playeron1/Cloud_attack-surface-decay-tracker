@@ -6,22 +6,22 @@ React 19 + Vite dashboard for the Cloud Attack-Surface Decay Tracker.
 
 From this directory:
 
-\`\`\`powershell
+```powershell
 npm install
 npm run dev
-\`\`\`
+```
 
-The backend should be running at http://127.0.0.1:5000. Override the API URL by creating \`.env.local\`:
+The backend should be running at http://127.0.0.1:5000. Override the API URL by creating `.env.local`:
 
-\`\`\`env
+```env
 VITE_API_BASE_URL=http://127.0.0.1:5000
-\`\`\`
+```
 
 Do not place AWS credentials or other secrets in Vite environment variables.
 
 ## Build and lint
 
-\`\`\`powershell
+```powershell
 npm run lint
 npm run build
-\`\`\`
+```
