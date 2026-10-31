@@ -6,6 +6,7 @@ from flask import Blueprint, current_app, jsonify, request
 from backend.engine.correlation_engine import correlate_dns_to_aws
 from backend.engine.finding_engine import analyze_aws_inventory, analyze_dns_results
 from backend.database.history import list_scans, save_scan
+from backend.demo.sample_data import get_demo_data
 from backend.scanners.aws_scanner import collect_aws_inventory
 from backend.scanners.cname_scanner import assess_cname_targets
 from backend.scanners.dns_scanner import scan_dns_records
@@ -231,6 +232,30 @@ def run_aws_scan():
         "data": {
             "inventory": inventory,
             "findings": aws_findings,
+            "correlations": correlations,
+        },
+    }), 200
+
+
+@scan_bp.route("/scans/aws/demo", methods=["POST"])
+def run_aws_demo():
+    """Return clearly labelled synthetic fixtures for a judge/demo walkthrough."""
+    dns_results, inventory = get_demo_data()
+    findings = analyze_aws_inventory(inventory)
+    correlations = correlate_dns_to_aws(
+        dns_results,
+        inventory.get("resources", []),
+    )
+
+    return jsonify({
+        "status": "demo",
+        "message": "Synthetic AWS sample loaded. This is not live account data.",
+        "data": {
+            "source": "synthetic_demo_data",
+            "notice": "All account IDs, resources and DNS observations in this view are fictional demo fixtures.",
+            "dns_results": dns_results,
+            "inventory": inventory,
+            "findings": findings,
             "correlations": correlations,
         },
     }), 200
