@@ -25,5 +25,5 @@ class Config:
     MAX_HISTORY_ITEMS = int(os.getenv("CAST_MAX_HISTORY_ITEMS", "20"))
     HISTORY_DB_PATH = os.getenv(
         "CAST_HISTORY_DB",
-        str(Path(__file__).resolve().parents[1] / "reports" / "cast_history.sqlite3"),
+        str(Path(__file__).resolve().parent / "reports" / "cast_history.sqlite3"),
     )
