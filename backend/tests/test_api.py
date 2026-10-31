@@ -98,3 +98,25 @@ def test_aws_demo_endpoint_is_labelled_synthetic():
         item["status"] == "matched"
         for item in payload["data"]["correlations"]
     )
+
+
+def test_cloud_demo_endpoint_returns_coherent_synthetic_domain_and_aws_scenario():
+    app = create_app()
+    app.config.update(TESTING=True)
+    response = app.test_client().post("/api/scans/demo", json={})
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["status"] == "demo"
+    assert payload["data"]["domain"] == "northstar-retail.example"
+    assert payload["data"]["scenario"]["synthetic"] is True
+    assert len(payload["data"]["dns"]["results"]) >= 5
+    assert payload["data"]["aws"]["inventory"]["provider"] == "aws-demo"
+    assert any(
+        finding["type"] == "potential_dangling_cname"
+        for finding in payload["data"]["findings"]
+    )
+    assert any(
+        item["status"] == "matched"
+        for item in payload["data"]["aws"]["correlations"]
+    )
