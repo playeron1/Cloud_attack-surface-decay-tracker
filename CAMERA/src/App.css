@@ -354,3 +354,45 @@ tbody tr:hover { background: rgba(45, 212, 191, .035); }
   .aws-controls label { grid-column: auto; }
   .footer { flex-direction: column; }
 }
+
+
+.aws-controls {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.region-field {
+  min-width: 230px;
+  flex: 1;
+}
+.region-field label {
+  display: block;
+  color: #cbd5e1;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.region-field select {
+  width: 100%;
+  background: #081321;
+  color: var(--text);
+  border: 1px solid #2a3b50;
+  border-radius: 9px;
+  padding: 13px 15px;
+}
+.aws-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.demo-button {
+  color: #fde68a;
+  border-color: rgba(251, 191, 36, .32);
+  background: rgba(120, 75, 15, .2);
+}
+.demo-alert {
+  color: #fde68a;
+  border: 1px solid rgba(251, 191, 36, .25);
+  background: rgba(120, 75, 15, .14);
+}
