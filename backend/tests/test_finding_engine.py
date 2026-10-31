@@ -64,3 +64,19 @@ def test_aws_inventory_flags_unattached_volume_and_public_policy():
     assert "potential_orphaned_storage" in types
     assert "missing_resource_ownership_metadata" in types
     assert "public_bucket_policy" in types
+
+
+def test_s3_missing_bucket_public_access_block_is_informational():
+    findings = analyze_aws_inventory({
+        "resources": [{
+            "resource_type": "s3_bucket",
+            "resource_id": "demo-bucket",
+            "public_access_block_status": "not_configured",
+            "bucket_policy_public": False,
+            "tags": {"Owner": "team"},
+        }]
+    })
+    assert len(findings) == 1
+    assert findings[0]["type"] == "s3_public_access_block_not_configured"
+    assert findings[0]["severity"] == "info"
+    assert "account-level block may still apply" in findings[0]["description"]
