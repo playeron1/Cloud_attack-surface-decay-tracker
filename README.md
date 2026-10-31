@@ -15,7 +15,7 @@ CAST investigates residual infrastructure after application decommissioning by c
 - Optional read-only AWS inventory for EC2 instances, EBS volumes and S3 bucket configuration.
 - Exact DNS A/AAAA to EC2 public/private IP correlation.
 - JSON report export from the React dashboard.
-- Clearly labelled synthetic AWS sample mode for demonstrations without cloud credentials.
+- A coherent, clearly labelled synthetic retired-cloud-application scenario for judge demonstrations without cloud credentials.
 
 ## Architecture
 
@@ -63,7 +63,7 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL printed in the terminal (normally http://localhost:5173).
+Open the Vite URL printed in the terminal (normally http://localhost:5173). The root-domain field is intentionally blank; enter only a domain you own or are authorized to assess. For the judge walkthrough, click **Load cloud demo scenario** to load the fictional Northstar Retail environment. Do not use an unrelated public domain as a substitute for a cloud inventory.
 
 ## Configuration
 
@@ -93,9 +93,9 @@ The AWS feature is optional. The core domain scan works without AWS credentials.
 
 Configure a dedicated read-only AWS identity on the backend host using the AWS SDK default credential chain or a local profile. Grant only the read/list/describe permissions required for STS identity, EC2 instance and volume descriptions, S3 bucket listing, bucket location, public access block and bucket policy status.
 
-Then use **Scan connected AWS account** in the dashboard. The endpoint never accepts access keys or secret keys from the browser. Without valid credentials or permissions, CAST returns an explicit unavailable response and the domain scanner remains usable. The **Load synthetic demo data** control provides fictional resources and reserved documentation IP ranges for a transparent offline walkthrough; it is never presented as live AWS data.
+Then use **Scan connected AWS account** in the dashboard. The endpoint never accepts access keys or secret keys from the browser. Without valid credentials or permissions, CAST returns an explicit unavailable response and the domain scanner remains usable. The **Load cloud demo scenario** control loads the fictional Northstar Retail decommissioning case: a reserved `.example` domain, residual DNS observations, a synthetic CNAME target marked NXDOMAIN, EC2/EBS/S3 inventory and an exact DNS-to-EC2 IP match. It uses reserved documentation IP ranges and is never presented as live AWS data.
 
-The current correlation is an exact IP match between DNS A/AAAA observations and EC2 public/private addresses in the selected region/account inventory. A non-match does not prove the resource is abandoned; resources in other accounts, regions, CDNs, load balancers or external providers will not appear in that match set.
+The judge scenario is a fully synthetic Northstar Retail retirement case using reserved `.example` hostnames and documentation IPs. It demonstrates residual hostnames, a dangling-reference indicator, external CDN dependency, incomplete DNS evidence, an EC2 address correlation, an unattached EBS volume and an S3 policy finding. The current live correlation is an exact IP match between DNS A/AAAA observations and EC2 public/private addresses in the selected region/account inventory. A non-match does not prove the resource is abandoned; resources in other accounts, regions, CDNs, load balancers or external providers will not appear in that match set.
 
 ## API endpoints
 
@@ -106,7 +106,8 @@ The current correlation is an exact IP match between DNS A/AAAA observations and
 | POST | /api/scans/domain | Discover and assess a root domain |
 | GET | /api/scans/history | Retrieve recent saved domain scans |
 | POST | /api/scans/aws | Collect read-only AWS inventory and correlate supplied DNS observations |
-| POST | /api/scans/aws/demo | Load explicitly synthetic demo inventory and correlation fixtures |
+| POST | /api/scans/aws/demo | Load synthetic AWS-only fixtures |
+| POST | /api/scans/demo | Load the full synthetic cloud decommissioning scenario |
 
 ## Tests and build
 

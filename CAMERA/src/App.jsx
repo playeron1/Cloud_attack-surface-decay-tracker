@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   getHealth,
   getScanHistory,
-  loadAwsDemo,
+  loadCloudDemo,
   scanAwsInventory,
   scanDomain,
 } from "./services/api";
@@ -153,7 +153,7 @@ function App() {
     setAwsData(null);
 
     try {
-      const response = await loadAwsDemo();
+      const response = await loadCloudDemo();
       setDomain(response.data.domain);
       setScanData(response);
       setAwsData({
@@ -267,7 +267,7 @@ function App() {
         {loading && (
           <div className="progress-line">
             <span />
-            <p>Querying Certificate Transparency and resolving selected DNS records…</p>
+            <p>{awsLoading ? "Loading the synthetic Northstar Retail cloud scenario…" : "Querying Certificate Transparency and resolving selected DNS records…"}</p>
           </div>
         )}
         {error && <div className="alert error-alert">{error}</div>}
