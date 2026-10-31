@@ -1,0 +1,42 @@
+name: CAST CI
+
+on:
+  push:
+    branches: [main, judge-ready-mvp]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+      - name: Compile backend
+        run: python -m compileall -q backend
+      - name: Run backend tests
+        run: python -m pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: CAMERA/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: CAMERA
+        run: npm ci
+      - name: Lint
+        working-directory: CAMERA
+        run: npm run lint
+      - name: Build
+        working-directory: CAMERA
+        run: npm run build
