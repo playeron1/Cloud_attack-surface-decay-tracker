@@ -144,6 +144,13 @@ def get_cloud_decommissioning_demo():
             "ttl_seconds": {"CNAME": 300},
             "errors": [],
         },
+        {
+            "hostname": "admin.northstar-retail.example",
+            "status": "partial",
+            "records": {"A": ["198.51.100.30"], "AAAA": [], "CNAME": [], "NS": [], "MX": []},
+            "ttl_seconds": {"A": 60},
+            "errors": [{"record_type": "AAAA", "reason": "Synthetic timeout fixture"}],
+        },
     ]
 
     inventory = {
@@ -231,7 +238,7 @@ def get_cloud_decommissioning_demo():
         "discovery": {
             "status": "synthetic",
             "source": "synthetic_demo_data",
-            "total_discovered": 5,
+            "total_discovered": len(dns_results) - 1,
             "hostnames_selected": len(dns_results),
             "hostnames": [item["hostname"] for item in dns_results],
             "error": None,
