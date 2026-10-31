@@ -181,6 +181,10 @@ def run_domain_scan():
 
             "dns": dns_result,
 
+            "cname_assessments": cname_assessments,
+
+            "cname_assessment_error": cname_assessment_error,
+
             "findings": findings
         }
     }), 200

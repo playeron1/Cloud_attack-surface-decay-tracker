@@ -1,4 +1,5 @@
-﻿from backend.scanners.dns_scanner import normalize_hostname
+
+from backend.scanners.dns_scanner import normalize_hostname
 
 import dns.resolver
 from dns.exception import Timeout
@@ -6,10 +7,16 @@ from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers
 
 
 def check_cname_target(target, timeout=2.0):
-    """Check whether an external CNAME target resolves."""
+    """
+    Check whether an external CNAME target resolves.
+
+    This performs DNS lookups only. It does not attempt
+    to claim or interact with the target service.
+    """
 
     try:
         target = normalize_hostname(target)
+
     except ValueError:
         return {
             "target": str(target),
@@ -19,6 +26,7 @@ def check_cname_target(target, timeout=2.0):
 
     resolver = dns.resolver.Resolver()
     resolver.timeout = timeout
+
     errors = []
 
     for record_type in ("A", "AAAA"):
@@ -67,13 +75,17 @@ def check_cname_target(target, timeout=2.0):
 
 
 def assess_cname_targets(domain, dns_results):
-    """Extract and assess unique external CNAME targets."""
+    """
+    Extract and assess unique external CNAME targets.
+    """
 
     root_domain = normalize_hostname(domain)
+
     assessments = []
     checked_targets = {}
 
     for host in dns_results:
+
         hostname = host.get("hostname", "")
         records = host.get("records", {})
 
@@ -86,6 +98,7 @@ def assess_cname_targets(domain, dns_results):
             cname_values = [cname_values]
 
         for raw_target in cname_values:
+
             if not isinstance(raw_target, str):
                 continue
 
@@ -99,18 +112,22 @@ def assess_cname_targets(domain, dns_results):
             except ValueError:
                 continue
 
+            # Skip targets within the assessed domain.
             if (
                 target == root_domain
                 or target.endswith("." + root_domain)
             ):
                 continue
 
+            # Avoid repeatedly checking the same target.
             if target not in checked_targets:
                 checked_targets[target] = check_cname_target(target)
 
+            assessment = checked_targets[target]
+
             assessments.append({
                 "hostname": hostname,
-                **checked_targets[target]
+                **assessment
             })
 
     return assessments
