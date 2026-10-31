@@ -27,7 +27,7 @@ function SeverityPill({ severity = "info" }) {
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Checking");
-  const [domain, setDomain] = useState("python.org");
+  const [domain, setDomain] = useState("");
   const [region, setRegion] = useState("ap-south-1");
   const [scanData, setScanData] = useState(null);
   const [awsData, setAwsData] = useState(null);
@@ -145,20 +145,30 @@ function App() {
 
 
   const handleAwsDemo = async () => {
+    setLoading(true);
     setAwsLoading(true);
+    setError("");
     setAwsError("");
+    setScanData(null);
     setAwsData(null);
 
     try {
       const response = await loadAwsDemo();
-      setAwsData(response);
+      setDomain(response.data.domain);
+      setScanData(response);
+      setAwsData({
+        status: "demo",
+        message: "Synthetic AWS inventory loaded.",
+        data: response.data.aws,
+      });
     } catch (err) {
       setAwsError(
         err.response?.data?.message ||
         err.message ||
-        "Could not load the synthetic AWS demo dataset."
+        "Could not load the synthetic cloud scenario."
       );
     } finally {
+      setLoading(false);
       setAwsLoading(false);
     }
   };
@@ -220,9 +230,9 @@ function App() {
       <section className="panel scan-panel">
         <div className="panel-heading">
           <div>
-            <p className="section-kicker">01 / DISCOVERY</p>
-            <h2>Domain intelligence scan</h2>
-            <p>Certificate Transparency discovery followed by DNS inspection.</p>
+            <p className="section-kicker">01 / DECOMMISSIONING REVIEW</p>
+            <h2>Cloud decommissioning assessment</h2>
+            <p>Discover authorized hostnames, inspect DNS dependencies and connect them to cloud inventory.</p>
           </div>
           <span className="step-number">01</span>
         </div>
@@ -234,14 +244,26 @@ function App() {
               id="domain"
               value={domain}
               onChange={(event) => setDomain(event.target.value)}
-              placeholder="example.com"
+              placeholder="your-owned-domain.com"
               autoComplete="url"
             />
-            <button className="primary-button" type="submit" disabled={loading}>
-              {loading ? "Scanning…" : "Start domain scan"}
+            <button className="primary-button" type="submit" disabled={loading || awsLoading}>
+              {loading && !awsLoading ? "Scanning…" : "Scan authorized domain"}
+            </button>
+            <button
+              className="secondary-button demo-button"
+              type="button"
+              onClick={handleAwsDemo}
+              disabled={loading || awsLoading}
+            >
+              {loading && awsLoading ? "Loading scenario…" : "Load cloud demo scenario"}
             </button>
           </div>
         </form>
+        <p className="subtle-note">
+          Live scans should target only a domain you own or are authorized to assess.
+          For the judge walkthrough, load the fictional cloud decommissioning scenario.
+        </p>
         {loading && (
           <div className="progress-line">
             <span />
@@ -255,17 +277,44 @@ function App() {
             {scanData.history_saved === false && " Scan history could not be saved."}
           </div>
         )}
+        {scanData?.data?.scenario?.synthetic && (
+          <div className="alert demo-alert">
+            SYNTHETIC SCENARIO — {scanData.data.scenario.notice}
+          </div>
+        )}
+        {awsError && <div className="alert warning-alert">{awsError}</div>}
       </section>
 
       {scanData && (
         <>
           <section className="metric-grid">
-            <Metric label="CT hostnames" value={discovery?.total_discovered ?? 0} detail="Discovered candidates" />
-            <Metric label="Hosts assessed" value={hosts.length} detail="Root + selected hosts" />
+            <Metric
+              label={discovery?.status === "synthetic" ? "Scenario hostnames" : "CT hostnames"}
+              value={discovery?.total_discovered ?? 0}
+              detail={discovery?.status === "synthetic" ? "Fictional inventory candidates" : "Discovered candidates"}
+            />
+            <Metric label="Hosts assessed" value={hosts.length} detail={discovery?.status === "synthetic" ? "Synthetic DNS observations" : "Root + selected hosts"} />
             <Metric label="Resolved" value={resolvedCount} detail={`${partialCount} partial · ${nxdomainCount} NXDOMAIN`} />
             <Metric label="DNS records" value={recordCount} detail="A · AAAA · CNAME · NS · MX" />
             <Metric label="Findings" value={findings.length} detail="Evidence-based observations" />
           </section>
+
+          {scanData.data?.scenario && (
+            <section className="panel scenario-panel">
+              <div className="panel-heading compact">
+                <div>
+                  <p className="section-kicker">DEMO SCENARIO / CLOUD LIFECYCLE</p>
+                  <h2>{scanData.data.scenario.name}</h2>
+                  <p>{scanData.data.scenario.description}</p>
+                </div>
+                <span className="step-number">SAMPLE</span>
+              </div>
+              <p className="subtle-note">
+                Lifecycle context: {scanData.data.scenario.lifecycle_event}.
+                This scenario is fictional and does not represent a real AWS account.
+              </p>
+            </section>
+          )}
 
           <section className="panel">
             <div className="panel-heading compact">
@@ -440,9 +489,6 @@ function App() {
             <button className="secondary-button" type="button" onClick={handleAwsScan} disabled={awsLoading}>
               {awsLoading ? "Collecting inventory…" : "Scan connected AWS account"}
             </button>
-            <button className="secondary-button demo-button" type="button" onClick={handleAwsDemo} disabled={awsLoading}>
-              Load synthetic demo data
-            </button>
           </div>
         </div>
         <p className="subtle-note">
@@ -451,7 +497,7 @@ function App() {
         {awsError && <div className="alert warning-alert">{awsError}</div>}
         {awsData?.data?.source === "synthetic_demo_data" && (
           <div className="alert demo-alert">
-            SAMPLE DATA ONLY — {awsData.data.notice}
+            SYNTHETIC AWS INVENTORY — {awsData.data.notice}
           </div>
         )}
         {awsData && awsInventory && (
