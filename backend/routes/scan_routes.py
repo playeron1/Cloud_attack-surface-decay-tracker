@@ -247,15 +247,15 @@ def run_aws_demo():
         inventory.get("resources", []),
     )
 
-<<<<<<< HEAD
-            "cname_assessments": cname_assessments,
-
-            "cname_assessment_error": cname_assessment_error,
-
-            "findings": findings
-        }
-    }), 200
-=======
+@scan_bp.route("/scans/aws/demo", methods=["POST"])
+def run_aws_demo():
+    """Return clearly labelled synthetic fixtures for a judge/demo walkthrough."""
+    dns_results, inventory = get_demo_data()
+    findings = analyze_aws_inventory(inventory)
+    correlations = correlate_dns_to_aws(
+        dns_results,
+        inventory.get("resources", []),
+    )
     return jsonify({
         "status": "demo",
         "message": "Synthetic AWS sample loaded. This is not live account data.",
@@ -276,7 +276,6 @@ def run_cloud_decommissioning_demo():
     scenario = get_cloud_decommissioning_demo()
     domain = scenario["domain"]
     dns_results = scenario["dns"]["results"]
-
     findings = analyze_dns_results(domain, dns_results)
 
     for assessment in scenario["cname_assessments"]:
@@ -309,8 +308,10 @@ def run_cloud_decommissioning_demo():
 
     inventory = scenario.pop("inventory")
     aws_findings = analyze_aws_inventory(inventory)
-    correlations = correlate_dns_to_aws(dns_results, inventory.get("resources", []))
-
+    correlations = correlate_dns_to_aws(
+        dns_results,
+        inventory.get("resources", []),
+    )
     scenario["findings"] = findings
     scenario["aws"] = {
         "source": "synthetic_demo_data",
@@ -319,10 +320,8 @@ def run_cloud_decommissioning_demo():
         "findings": aws_findings,
         "correlations": correlations,
     }
-
     return jsonify({
         "status": "demo",
         "message": "Synthetic cloud decommissioning scenario loaded. No live domain or AWS account was scanned.",
         "data": scenario,
     }), 200
->>>>>>> 271155c94c63bb5be125102ae2a8531ed300f3d0
